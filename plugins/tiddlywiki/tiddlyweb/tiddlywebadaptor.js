@@ -15,6 +15,10 @@ A sync adaptor module for synchronising with TiddlyWeb compatible servers
 var CONFIG_HOST_TIDDLER = "$:/config/tiddlyweb/host",
 	DEFAULT_HOST_TIDDLER = "$protocol$//$host$/";
 
+function encodeTiddlerTitle(title) {
+	return encodeURIComponent(title.replace(/\//g, "%SLASH%"));
+}
+
 function TiddlyWebAdaptor(syncer) {
 	this.syncer = syncer;
 	this.host = this.getHost();
@@ -159,7 +163,7 @@ Save a tiddler and invoke the callback with (err,adaptorInfo,revision)
 TiddlyWebAdaptor.prototype.saveTiddler = function(tiddler,callback) {
 	var self = this;
 	$tw.utils.httpRequest({
-		url: this.host + "recipes/" + encodeURIComponent(this.recipe) + "/tiddlers/" + encodeURIComponent(tiddler.fields.title),
+		url: this.host + "recipes/" + encodeURIComponent(this.recipe) + "/tiddlers/" + encodeTiddlerTitle(tiddler.fields.title),
 		type: "PUT",
 		headers: {
 			"Content-type": "application/json"
@@ -185,7 +189,7 @@ Load a tiddler and invoke the callback with (err,tiddlerFields)
 TiddlyWebAdaptor.prototype.loadTiddler = function(title,callback) {
 	var self = this;
 	$tw.utils.httpRequest({
-		url: this.host + "recipes/" + encodeURIComponent(this.recipe) + "/tiddlers/" + encodeURIComponent(title),
+		url: this.host + "recipes/" + encodeURIComponent(this.recipe) + "/tiddlers/" + encodeTiddlerTitle(title),
 		callback: function(err,data,request) {
 			if(err) {
 				return callback(err);
@@ -208,7 +212,7 @@ TiddlyWebAdaptor.prototype.deleteTiddler = function(title,callback) {
 	}
 	// Issue HTTP request to delete the tiddler
 	$tw.utils.httpRequest({
-		url: this.host + "bags/" + encodeURIComponent(bag) + "/tiddlers/" + encodeURIComponent(title),
+		url: this.host + "bags/" + encodeURIComponent(bag) + "/tiddlers/" + encodeTiddlerTitle(title),
 		type: "DELETE",
 		callback: function(err,data,request) {
 			if(err) {
