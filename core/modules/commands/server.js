@@ -25,6 +25,10 @@ exports.info = {
 	synchronous: true
 };
 
+function decodeTiddlerTitle(title) {
+	return decodeURIComponent(title).replace(/%BACKSLASH%/g, "/");
+}
+
 /*
 A simple HTTP server with regexp-based routes
 */
@@ -83,6 +87,7 @@ SimpleServer.prototype.listen = function(port,host) {
 	var self = this;
 	http.createServer(function(request,response) {
 		// Compose the state object
+		console.log("new request: " + request.url + " type=" + request.method);
 		var state = {};
 		state.wiki = self.wiki;
 		state.server = self;
@@ -144,7 +149,7 @@ var Command = function(params,commander,callback) {
 		method: "PUT",
 		path: /^\/recipes\/default\/tiddlers\/(.+)$/,
 		handler: function(request,response,state) {
-			var title = decodeURIComponent(state.params[0]),
+			var title = decodeTiddlerTitle(state.params[0]),
 				fields = JSON.parse(state.data);
 			// Pull up any subfields in the `fields` object
 			if(fields.fields) {
@@ -169,7 +174,7 @@ var Command = function(params,commander,callback) {
 		method: "DELETE",
 		path: /^\/bags\/default\/tiddlers\/(.+)$/,
 		handler: function(request,response,state) {
-			var title = decodeURIComponent(state.params[0]);
+			var title = decodeTiddlerTitle(state.params[0]);
 			state.wiki.deleteTiddler(title);
 			response.writeHead(204, "OK");
 			response.end();
@@ -233,7 +238,7 @@ var Command = function(params,commander,callback) {
 		method: "GET",
 		path: /^\/recipes\/default\/tiddlers\/(.+)$/,
 		handler: function(request,response,state) {
-			var title = decodeURIComponent(state.params[0]),
+			var title = decodeTiddlerTitle(state.params[0]),
 				tiddler = state.wiki.getTiddler(title),
 				tiddlerFields = {},
 				knownFields = [
